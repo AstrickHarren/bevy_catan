@@ -9,6 +9,7 @@ bevy_asset_loader = "0.20.1"
 bevy-inspector-egui = "0.24.0"
 rand = "0.8.5"
 bevy_mod_picking = "0.18.2"
+bevy_panorbit_camera = "0.18.0"
 
 [profile.dev]
 opt-level = 1
