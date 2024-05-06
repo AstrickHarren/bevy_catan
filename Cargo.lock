@@ -1552,7 +1552,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "cardboard"
+name = "catan"
 version = "0.1.0"
 dependencies = [
  "bevy",
