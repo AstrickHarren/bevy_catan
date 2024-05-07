@@ -14,6 +14,12 @@ pub(crate) struct TileAsset {
     pub pasture: Handle<Scene>,
 }
 
+#[derive(AssetCollection, Resource)]
+pub(crate) struct PieceAsset {
+    #[asset(path = "pieces/unit-house.glb#Scene0")]
+    pub house: Handle<Scene>,
+}
+
 pub(crate) struct LoadAssetPlugin;
 
 impl Plugin for LoadAssetPlugin {
@@ -21,6 +27,7 @@ impl Plugin for LoadAssetPlugin {
         app.init_state::<LoadState>().add_loading_state(
             LoadingState::new(LoadState::Loading)
                 .continue_to_state(LoadState::Loaded)
+                .load_collection::<PieceAsset>()
                 .load_collection::<TileAsset>(),
         );
     }

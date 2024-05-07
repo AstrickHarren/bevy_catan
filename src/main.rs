@@ -1,3 +1,4 @@
+mod build;
 mod camera;
 mod light;
 mod load_asset;
@@ -7,6 +8,7 @@ mod placeholder;
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_mod_picking::DefaultPickingPlugins;
+use build::BuildPlugin;
 use camera::CameraPlugin;
 use light::LightPlugin;
 use load_asset::LoadAssetPlugin;
@@ -23,5 +25,6 @@ fn main() {
         .add_plugins(MapPlugin)
         .add_plugins(DefaultPickingPlugins)
         .add_plugins(PlaceHolderPlugin)
+        .add_plugins(BuildPlugin)
         .run();
 }

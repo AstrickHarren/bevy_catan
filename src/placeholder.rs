@@ -1,14 +1,18 @@
 use bevy::prelude::*;
 use bevy_mod_picking::{
-    highlight::{Highlight, HighlightKind},
+    highlight::{Highlight, HighlightKind, InitialHighlight},
     PickableBundle,
 };
 
 pub(crate) struct PlaceHolderPlugin;
 
+#[derive(Debug, Component, Reflect)]
+struct InitMaterial(Handle<StandardMaterial>);
+
 impl Plugin for PlaceHolderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, init_placeholders);
+        app.add_systems(PreUpdate, (init_placeholders, rm_placeholders))
+            .register_type::<InitMaterial>();
     }
 }
 
@@ -44,7 +48,8 @@ fn init_placeholders(
             .collect::<Vec<_>>();
         for d in desc {
             // transparent placeholder
-            let mut mtl = mtls.get_mut(d).unwrap();
+            let mtl = mtls.get_mut(d).unwrap().into_inner();
+            let init_mtl = mtl.clone();
             let mut ass = assets.get(mtl.id()).unwrap().clone();
             ass.base_color.set_a(0.5);
             ass.alpha_mode = AlphaMode::Blend;
@@ -52,8 +57,35 @@ fn init_placeholders(
 
             // add hover to placeholder
             cmds.entity(d)
+                .insert(InitMaterial(init_mtl))
                 .insert(PickableBundle::default())
                 .insert(PLACEHOLDER_HIGHLIGHT);
+        }
+    }
+}
+
+fn rm_placeholders(
+    mut placeholders: RemovedComponents<PlaceHolder>,
+    children: Query<&Children>,
+    mut mtls: Query<(&InitMaterial, &mut Handle<StandardMaterial>)>,
+    mut cmds: Commands,
+) {
+    for e in placeholders.read() {
+        let desc = children
+            .iter_descendants(e)
+            .filter(|e| mtls.get(*e).is_ok())
+            .collect::<Vec<_>>();
+
+        for d in desc {
+            let (init_mtl, mut mtl) = mtls.get_mut(d).unwrap();
+            *mtl = init_mtl.0.clone();
+
+            // remove highlight and pickable
+            cmds.entity(d)
+                .remove::<PickableBundle>()
+                .remove::<Highlight<StandardMaterial>>()
+                .remove::<InitialHighlight<StandardMaterial>>()
+                .remove::<InitMaterial>();
         }
     }
 }
